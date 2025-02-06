@@ -5,7 +5,7 @@ import pandas as pd
 
 from modules.inferencing_func import inference_fn
 from modules.wrapper import time_taken
-from modules.helper import extract_text_from_pdf
+from modules.helper import extract_text_from_pdf, compare_dataframes
 from modules.llm_model import llm_pipeline_get_df
 
 from transformers import DonutProcessor, VisionEncoderDecoderModel
@@ -44,7 +44,7 @@ def for_image_data(image):
 @time_taken
 def main():
     st.title("Convert Your Invoice into an Interactive Tabular Format")
-    solution_options = ["donut_cord", "donut_docs", "prompting_soln"]
+    solution_options = ["donut_cord", "prompting_soln"]
 
     uploaded_file = st.file_uploader("Upload an invoice image or PDF", type=["jpg", "png", "jpeg", "pdf"])
 
@@ -70,16 +70,20 @@ def main():
 
     if submit:
         with st.spinner("Processing..."):
-            if image:
-                dfs = for_image_data(image)
+            if type(image) == str():
+                # pdf
+                dfs = []
             else:
-                dfs = for_pdf_data(uploaded_file)
+                dfs = for_image_data(image)
 
-        for item in dfs:
-            df = item[0]
-            name = item[1]
+        print("dataframes : ", dfs)
+
+        for df in dfs:
+            name = df[0]
+            dataframe = df[1]
             st.text(name)
-            st.dataframe(df)
+            st.dataframe(dataframe)
+    
 
 if __name__ == "__main__":
     main()

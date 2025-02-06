@@ -8,19 +8,22 @@ import io
 DEVICE = "cuda: 0" if torch.cuda.is_available() else "cpu"
 
 def json_to_df(data):
-    print(data)
+    print("data : ", data)
 
     dfs = []
-    for key, value in data.items():
-        dfs.append((
-            pd.json_normalize(value, sep="_")
-            .rename(columns=lambda x: x.replace(".", "_")), key
-        ))
+
+    for name, df in data.items():
+        try:
+            dfs.append(
+                (name, pd.json_normalize(df, sep="_"))
+            )
+        except Exception as e:
+            pass
 
     return dfs
 
 
-def inference_fn(invoice: str, model, processor):
+def inference_fn(invoice, model, processor):
     # Reading image
     if type(invoice) == str:
         img = Image.open(invoice)
@@ -29,7 +32,7 @@ def inference_fn(invoice: str, model, processor):
         img = invoice 
 
     # Convert to RGB
-    img = invoice.convert("RGB")
+    img = img.convert("RGB")
 
     # Prompting task
     task_prompt = "<s_cord-v2>"
